@@ -1,34 +1,36 @@
 <template>
   <div class="app-container">
     <el-input v-model="filterText" placeholder="Filter keyword" style="margin-bottom:30px;" />
-
+    <el-button @click="csGet()">点击</el-button>
     <el-tree
       ref="tree2"
       :data="data2"
       :props="defaultProps"
-      :filter-node-method="filterNode"
       class="filter-tree"
       default-expand-all
     />
+    <!-- :filter-node-method="filterNode" -->
 
   </div>
 </template>
 
 <script>
+import {getPrj,getCls} from '@/api/tree'
+
 export default {
 
   data() {
     return {
       filterText: '',
-      data2: [{
+      data3: [{
         id: 1,
-        label: 'Level one 1',
+        label: '项目名称',
         children: [{
           id: 4,
-          label: 'Level two 1-1',
+          label: '用例类别',
           children: [{
             id: 9,
-            label: 'Level three 1-1-1'
+            label: '用例名称'
           }, {
             id: 10,
             label: 'Level three 1-1-2'
@@ -55,10 +57,13 @@ export default {
           label: 'Level two 3-2'
         }]
       }],
+
+      data2:[],
       defaultProps: {
         children: 'children',
         label: 'label'
-      }
+      },
+      cls_data: [{id: "3", class_name: "cs"}]
     }
   },
   watch: {
@@ -71,6 +76,44 @@ export default {
     filterNode(value, data) {
       if (!value) return true
       return data.label.indexOf(value) !== -1
+    },
+
+    clsGet(id) {
+      // var cl = getCls(`?project_id=${id}`).then(response => {
+      //   return response.data
+      // })
+      getCls(`?project_id=${id}`).then(response => {
+        this.cls_data = response.data
+      })
+    },
+
+
+    csGet(){
+      getPrj().then(response => {
+        var data = response.data
+        var data_list = []
+        for (const key in data) {
+          var dic_data = data[key]
+          var dic = {}
+          dic["id"] = dic_data["id"]
+          dic["label"] = dic_data["project_name"]
+          var cls_list = []
+          this.clsGet(dic_data["id"])
+          console.log(this.cls_data)
+          // console.log(this.cls_data)
+          for (const k in this.cls_data){
+            var c_data = this.cls_data[k]
+            var cls_dic = {}
+            cls_dic["id"] = c_data["id"]
+            cls_dic["label"] = c_data["class_name"]
+            cls_list.push(cls_dic)
+          }
+          dic["children"] = cls_list
+          this.data2.push(dic)
+          console.log(key)
+        }
+
+      })
     }
   }
 }
