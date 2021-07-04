@@ -1,11 +1,34 @@
 <template>
   <div class="app-container">
-    <div style="margin-bottom:20px">
-      <el-input v-model="getData" style="width:40%" placeholder="筛选用例名称"></el-input>
-      <el-button size="mini" type="" @click="caseGet()" style="margin-left:10px">搜索</el-button>
+    <div style="margin-bottom:20px" class="fileter">
+      <el-input v-model="fileter_get.case_name" :style="fileter_input.case_name"  placeholder="请输入用例名称" clearable size="small">
+        <template slot="prepend">用例名称</template>
+      </el-input>
+      <el-input v-model="fileter_get.id" v-if="fileter.id" placeholder="请输入用例ID" clearable size="small"></el-input>
+      <el-input v-model="fileter_get.element_value" v-if="fileter.element_value" placeholder="请输入元素地址" clearable size="small"></el-input>
+      <el-button size="mini" type="" @click="getFileterCase()" style="margin-left:10px">搜索</el-button>
       <el-button size="mini" type="primary" @click="dialogVisible=true;resetForm(form,'form');caseTitle='新增用例'">新增</el-button>
       <el-button size="mini" type="primary" @click="result()">生成测试报告</el-button>
+      <el-dropdown style="float:right" @click.stop>
+        <el-button type="primary" size="mini">
+          筛选条件<i class="el-icon-arrow-down el-icon--right"></i>
+        </el-button>
+        <el-dropdown-menu>
+          <el-dropdown-item>
+            <el-checkbox v-model="fileter.case_name" @click.stop>用例名称</el-checkbox>
+          </el-dropdown-item>
+          <el-dropdown-item>
+            <el-checkbox v-model="fileter.id" @click.stop>用例ID</el-checkbox>
+          </el-dropdown-item>
+          <el-dropdown-item>
+            <el-checkbox v-model="fileter.element_value">元素位置</el-checkbox>
+          </el-dropdown-item>
+          <!-- <el-checkbox v-model="fileter_case_name">用例ID</el-checkbox>
+          <el-checkbox v-model="fileter_case_name">用例ID2</el-checkbox> -->
+        </el-dropdown-menu>
+      </el-dropdown>
     </div>
+
     <el-table
       v-loading="listLoading"
       :data="list"
@@ -59,11 +82,11 @@
       </el-table-column>
     </el-table>
   
-    <el-dialog :visible.sync="dialogVisible" :title=caseTitle>
+    <el-dialog :visible.sync="dialogVisible" :title=caseTitle width="30%">
       <el-form 
-      ref="form" :model="form" label-width="90px" :inline="true" :rules="rules">
-        <el-form-item label="用例名称" prop="case_name">
-          <el-input v-model=form.case_name placeholder=""></el-input>
+      ref="form" :model="form" label-width="90px" label-position="right" :inline="true" size="mini">
+        <el-form-item label="用例名称" prop="case_name" >
+          <el-input type="text" v-model=form.case_name placeholder=""></el-input>
         </el-form-item> 
         <el-form-item label="创建时间" prop="create_time">
           <el-input v-model=form.create_time placeholder="element" disabled></el-input>
@@ -113,11 +136,22 @@
         </el-form-item>
         <el-form-item label="活动名称" prop="url">
           <el-input v-model=form.url></el-input>
-        </el-form-item> 
-        <el-button size="mini" style="" @click="dialogVisible=false">取消</el-button>
-        <el-button size="mini" type="danger" @click="dialogVisible=false;createCase(form)">确认</el-button>
+        </el-form-item>
+         
+        <el-button size="mini" style="float:right" @click="dialogVisible=false">取消</el-button>
+        <el-button size="mini" style="float:right;margin-right:10px" type="danger" @click="dialogVisible=false;createCase(form)">确认</el-button>
       </el-form>
     </el-dialog>
+    <div style="position:absolute;buttom:0;right:0">
+      <el-pagination
+      :current-page="4"
+      :page-sizes="[10,30,50,100]"
+      :page-size="30"
+      :total="100"
+      layout="total, sizes, prev, pager, next, jumper"
+      >
+      </el-pagination>
+    </div>
   </div>
 </template>
 <script>
@@ -140,6 +174,48 @@ export default {
       listLoading: true,
       dialogVisible: false,
       getData: "",
+      promp_message:"",
+      fileter:{
+        id: true, 
+        project_id: true, 
+        class_name: true, 
+        url: true, 
+        case_name: true, 
+        element: true, 
+        element_value: false, 
+        element_sub: true, 
+        convention:true, 
+        convention_value: true, 
+        assert_convention: true, 
+        assert_element: true, 
+        assert_value: true, 
+        page: true, 
+        platform: true, 
+        create_time: true, 
+        update_time: true        
+      },
+      fileter_input: {
+        case_name:{
+          width:"15%",
+          marginLeft:"10px",
+          display:""
+        },
+        id:{
+          width:"15%",
+          marginLeft:"10px",
+          display:""
+        },
+        element_value:{
+          width:"15%",
+          marginLeft:"10px",
+          display:"none"
+        }
+      },
+      fileter_get: {
+        case_name:"",
+        id:"",
+        element_value:""
+      },
       // form: null
       form:{
         id: "", 
@@ -179,41 +255,117 @@ export default {
     }
   },
   created() {
-    this.caseGet()
+    // this.caseGet()
+    this.list = [{
+        id: "1", 
+        project_id: "", 
+        class_name: "class_name", 
+        url: "url", 
+        case_name: "case_name", 
+        element: "element", 
+        element_value: "element_value", 
+        element_sub: "element_sub", 
+        convention: "convention", 
+        convention_value: "convention_value", 
+        assert_convention: "n", 
+        assert_element: "assert_element", 
+        assert_value: "assert_value", 
+        page: "page", 
+        platform: "platform", 
+        create_time: "", 
+        update_time: ""
+      }],
+    this.listLoading = false
   },
   methods: {
-    caseGet() {
+    caseGet(data="") {
       // debugger
       this.listLoading = true
-      getList().then(response => {
+      getList(data).then(response => {
         this.list = response.data
         this.listLoading = false
       })
+    },
+    // 弹窗提示
+    popMessage(da){
+      if (da=="success") {
+        this.$notify({
+          title: "success",
+          message: this.promp_message,
+          type: "success",
+          duration: 2500
+        })
+      } else if(da=="info"){
+        this.$notify({
+          title: "提示",
+          message: this.promp_message,
+          type: "info",
+          duration: 2500
+        })
+      } else{
+        this.$notify({
+          title: "error",
+          message: this.promp_message,
+          type: "error",
+          duration: 2500
+        })
+      }
     },
 
     // 重新加载页面
     pageOver(){
       location.reload()
     },
-    getOneCase(id) {
+    getOneCase(id){
       getList(`?id=${id}`).then(response => {
         this.form = response.data[0]
       })
     },
+    getFileterCase(id) {
+      var str = "?"
+      for (const key in this.fileter_get) {
+        var value = this.fileter_get[key]
+        if (value) {
+          str =  str + `${key}=${value}&`
+        }
+      }
+      if (str=="?") {
+        getList().then(response => {
+          this.form = response.data[0]
+        })
+      } else {
+        getList(str.substr(0,str.length-1)).then(response => {
+          this.form = response.data[0]
+        })
+      }
+    },
     caseUpdate(data){
       csUpdate(data).then(response =>{
-        this.caseGet()
+        this.promp_message = "更新用例成功"
+        this.popMessage("success")
+      }).catch(response =>{
+        this.promp_message = response.data
+        this.popMessage("")
       })
     },
 
     caseAdd(data){
       csAdd(data).then(response => {
-        this.caseGet()
+        this.promp_message = "添加用例成功"
+        this.popMessage("success")
+      }).catch(response =>{
+        this.promp_message = response.data
+        this.popMessage("")
       })
     },
 
     caseDelete(id){
       csDelete(id).then(response =>{
+        this.promp_message = "删除成功"
+        this.popMessage("success")
+      }).catch(response =>{
+        this.promp_message = response.data
+        this.popMessage("")
       })
     },
     result(){
@@ -247,19 +399,24 @@ export default {
         type: 'warning'
         
       }).then(() => {
-        this.caseDelete(id),
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
-        });
-         
+        this.caseDelete(id)
       }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        });
+        this.promp_message = "已取消删除"
+        this.popMessage("info")
       });
     }
   }
 }
 </script>
+
+<style>
+  .el-checkbox {
+    font-size:10px;
+    margin-left: 10px;
+    
+  }
+  .fileter .el-input{
+    width: 19%;
+    margin-left: 10px;
+  }
+</style>
