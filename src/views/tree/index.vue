@@ -1,163 +1,81 @@
 <template>
-  <div class="app-container">
-    <el-input v-model="filterText" placeholder="Filter keyword" style="width:19%" size="small"/>
-    <el-button @click="resetChecked()" size="small" type="primary">清空</el-button>
-    <el-button @click="setCheckedNodes()" size="small" type="primary">全选</el-button>
-    <el-tree
-      ref="tree2"
-      :data="data3"
-      :props="defaultProps"
-      class="filter-tree"
-      default-expand-all
-      show-checkbox
-      node-key="id">
-      <span class="custom-tree-node" slot-scope="{ node, data }">
-        
-      </span>
-      
-      </el-tree>
-
-  </div>
+    <div class="setTable">
+        <div class="pageTitle">
+            <el-input v-model="testFile.set_name" style="width:200px" size='small'></el-input>
+            <el-button type="primary" size="small" style="margin-left:10px">搜索</el-button>
+        </div>
+        <div class="pageBody">
+            <el-table
+            :data="list"
+            fit
+            highlight-current-row
+            >
+            <el-table-column align="center" label="ID" prop="id">
+                <template slot-scope="scope">
+                {{ scope.row.id }}
+                </template>
+            </el-table-column>
+            <el-table-column align="center" label="测试集名称" prop="set_name">
+                <template slot-scope="scope">
+                    <el-button type="text" @click="setNameClick()">{{ scope.row.set_name }}</el-button>
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="create_time" label="创建时间" >
+                <template slot-scope="scope">
+                {{ scope.row.create_time }}
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="caseList" label="绑定用例条数" >
+                <template slot-scope="scope">
+                {{ scope.row.create_time }}
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="create_time" label="操作">
+                <template slot-scope="scope">
+                    <el-button size="mini" >编辑</el-button>
+                    <el-button size="mini" type="primary" @click="deletePrj(scope)">删除</el-button>
+                </template>
+            </el-table-column>
+            </el-table>
+        </div>
+    </div>
 </template>
 
 <script>
-import {getPrj,getCls} from '@/api/tree'
 
-export default {
-
-  data() {
-    return {
-      filterText: '',
-      checkIdList: [],
-      data3: [{
-        id: 1,
-        label: '项目名称',
-        children: [{
-          id: 4,
-          label: '用例类别',
-          children: [{
-            id: 9,
-            label: '用例名称'
-          }, {
-            id: 10,
-            label: 'Level three 1-1-2'
-          }]
-        }]
-      }, {
-        id: 2,
-        label: 'Level one 2',
-        children: [{
-          id: 5,
-          label: 'Level two 2-1'
-        }, {
-          id: 6,
-          label: 'Level two 2-2'
-        }]
-      }, {
-        id: 3,
-        label: 'Level one 3',
-        children: [{
-          id: 7,
-          label: 'Level two 3-1'
-        }, {
-          id: 8,
-          label: 'Level two 3-2'
-        }]
-      }],
-
-      data2:[],
-      defaultProps: {
-        children: 'children',
-        label: 'label'
-      },
-      cls_data: [{id: "3", class_name: "cs"}]
-    }
-  },
-  watch: {
-    filterText(val) {
-      this.$refs.tree2.filter(val)
-    }
-  },
-
-  methods: {
-    filterNode(value, data) {
-      if (!value) return true
-      return data.label.indexOf(value) !== -1
-    },
-
-    clsGet(id) {
-      // var cl = getCls(`?project_id=${id}`).then(response => {
-      //   return response.data
-      // })
-      getCls(`?project_id=${id}`).then(response => {
-        this.cls_data = response.data
-      })
-    },
-    getCheckedNodes (){
-      return this.$refs.tree2.getCheckedNodes()
-    },
-    resetChecked() {
-      this.$refs.tree2.setCheckedKeys([])
-    },
-    setCheckedKeys() {
-      this.$refs.tree2.setCheckedKeys(true)
-    },
-    setCheckedNodes() {
-      this.$refs.tree2.setCheckedNodes(this.data3)
-    },
-
-    dataList(data) {
-      var data_list = []
-      for (const key in data) {
-        var dic_data = data[key]
-        var dic = {}
-        dic["id"] = dic_data["id"]
-        dic["label"] = dic_data["project_name"]
-        var cls_list = []
-        this.clsGet(dic_data["id"])
-        console.log(this.cls_data)
-        // console.log(this.cls_data)
-        for (const k in this.cls_data){
-          var c_data = this.cls_data[k]
-          var cls_dic = {}
-          cls_dic["id"] = c_data["id"]
-          cls_dic["label"] = c_data["class_name"]
-          cls_list.push(cls_dic)
+export default { 
+    data() {
+        return {
+            testFile:{
+                set_name:''
+            },
+            list:[{
+                id:'1',
+                project_id:'1',
+                set_name:'测试集',
+                case_list:'10',
+                check_idList:'1',
+                create_time:'2021-07-13 11:17:23',
+                update_time:'2021-07-13 11:17:23'
+            }]
         }
-        dic["children"] = cls_list
-        this.data2.push(dic)
-        console.log(key)
-      }
     },
-
-    csGet() {
-      getPrj().then(response => {
-        var data = response.data
-        var data_list = []
-        for (const key in data) {
-          var dic_data = data[key]
-          var dic = {}
-          dic["id"] = dic_data["id"]
-          dic["label"] = dic_data["project_name"]
-          var cls_list = []
-          this.clsGet(dic_data["id"])
-          console.log(this.cls_data)
-          // console.log(this.cls_data)
-          for (const k in this.cls_data){
-            var c_data = this.cls_data[k]
-            var cls_dic = {}
-            cls_dic["id"] = c_data["id"]
-            cls_dic["label"] = c_data["class_name"]
-            cls_list.push(cls_dic)
-          }
-          dic["children"] = cls_list
-          this.data2.push(dic)
-          console.log(key)
+    methods: {
+        setNameClick(){
+            this.$router.push({path:'/example/tree/caseSetTree'})
         }
-
-      })
     }
-  }
+
 }
 </script>
-
+<style>
+.setTable {
+    padding-top: 20px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 20px;
+}
+.pageBody {
+    padding-top: 22px;
+}
+</style>

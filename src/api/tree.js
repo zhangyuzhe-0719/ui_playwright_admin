@@ -13,3 +13,10 @@ export function getCls(params="") {
       method: 'get'
     })
   }
+
+export function getTree() {
+    return request({
+      url: `/caseTree`,
+      method: 'get'
+    })
+  }

@@ -24,7 +24,7 @@
           <p>
               {{ chapter.title }}
               <!-- 每个章节条后面的三个操作 -->
-              <span class="acts">
+              <cpan class="acts">
               <!-- 添加小节的时候 需要传如章节的ID -->
                   <el-button type="text" @click="openVideo(chapter.id)">添加小节</el-button>
                    <!-- <el-button type="text" @click="dialogVideoFormVisible = true; chapterId = chapter.id">添加小节</el-button> -->

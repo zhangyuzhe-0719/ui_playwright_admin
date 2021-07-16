@@ -36,3 +36,11 @@ export function resultCreate() {
     method: 'get'
   })
 }
+
+export function statusCase() {
+  return request({
+    url: '/playRun',
+    method: 'Post'
+    // data:params
+  })
+}
