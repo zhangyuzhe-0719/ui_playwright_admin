@@ -425,7 +425,7 @@ export default {
       })
     },
     clUpdate(){
-      deleteClass(this.clForm).then(response=>{
+      updateClass(this.clForm).then(response=>{
         this.promp_message = "更新类成功"
         this.popMessage("success")
       }).catch(response =>{
@@ -433,19 +433,22 @@ export default {
         this.popMessage("")
       })
     },
-    clDelete(id){
-      updateClass(id).then(response=>{
+    clDelete(node,data){
+      var id = data.id.replace('class','')
+      deleteClass(`?id=${id}`).then(response=>{
         this.promp_message = "删除类成功"
         this.popMessage("success")
+        removeData(node,data)
       }).catch(response =>{
         this.promp_message = response.data
         this.popMessage("")
       })
     },
-    caseDelete(id) {
-      caseDelete(id).then(response=>{
+    caseDelete(node,data) {
+      caseDelete(`?id=${data.id}`).then(response=>{
         this.promp_message = "删除用例成功"
         this.popMessage("success")
+        removeData(node,data)
       }).catch(response =>{
         this.promp_message = response.data
         this.popMessage("")
@@ -455,22 +458,23 @@ export default {
       console.log(cs)
     },
     
-    deleteData(data){
+    deleteData(node,data){
       this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         if (data.type=='application'){
-          this.clDelete(data.id.replace('class',''))
+          this.clDelete(node,data)
         } else {
-          this.caseDelete(id)
+          this.caseDelete(node,data)
         }
       }).catch(() => {
         this.promp_message = "已取消删除"
         this.popMessage("info")
       });
     },
+    
 
     popMessage(da){
       if (da=="success") {
@@ -557,6 +561,13 @@ export default {
       }
       data.children.push(newChild);
     },
+
+    removeData(node,data) {
+      const parent = node.parent;
+      const children = parent.data.children || parent.data;
+      const index = children.findIndex(d => d.id === data.id);
+      children.splice(index, 1);
+    }
   }
 }
 </script>
